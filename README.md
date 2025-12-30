@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Pastebin Lite
 
-## Getting Started
+A simple, secure pastebin application built with Next.js and Redis.
 
-First, run the development server:
+## Features
+- Create text pastes with optional expiry (TTL).
+- Set maximum view limits (burn after reading).
+- "Premium" clean UI.
+- API-first design.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Tech Stack
+- **Framework**: Next.js (App Router)
+- **Language**: JavaScript
+- **Persistence**: Redis (via `ioredis`)
+- **Styling**: CSS Modules (Vanilla CSS variables)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Persistence Choice
+I chose **Redis** for the persistence layer because:
+1. **TTL Support**: Redis has native support for key expiration (`EXPIRE`), which maps perfectly to the "Time-based expiry" requirement.
+2. **Performance**: In-memory speeds for fast read/write of pastes.
+3. **Atomic Counters**: `INCR` operations make handling "Max Views" concurrency simple and robust.
+4. **Simplicity**: Key-Value storage is ideal for mapping IDs to paste content.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## Setup & Run Locally
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. **Prerequisites**:
+   - Node.js (v18+)
+   - Redis server running locally (default: `localhost:6379`) or a `REDIS_URL` environment variable.
 
-## Learn More
+2. **Install Dependencies**:
+   ```bash
+   npm install
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+3. **Run Development Server**:
+   ```bash
+   npm run dev
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+4. **Open Browser**:
+   Visit [http://localhost:3000](http://localhost:3000)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## API Endpoints
 
-## Deploy on Vercel
+- **GET /api/healthz**: Health check.
+- **POST /api/pastes**: Create a paste.
+  - Body: `{ "content": "...", "ttl_seconds": 60, "max_views": 5 }`
+- **GET /api/pastes/:id**: Fetch paste JSON.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Testing
+- The application supports deterministic time testing via `TEST_MODE=1` and `x-test-now-ms` header.
